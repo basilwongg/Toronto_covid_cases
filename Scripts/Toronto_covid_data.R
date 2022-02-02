@@ -51,17 +51,17 @@ clean_raw_data <-
   mutate(
     age_group = 
       recode(
-      age_group,
-      '19 and younger' = '≤19',
-      '20 to 29 Years' = '20-29',
-      '30 to 39 Years' = '30-39',
-      '40 to 49 Years' = '40-49',
-      '50 to 59 Years' = '50-59',
-      '60 to 69 Years' = '60-69',
-      '70 to 79 Years' = '70-79',
-      '80 to 89 Years' = '80-89',
-      '90 and older' = '90+'
-    )
+        age_group,
+        '19 and younger' = '≤19',
+        '20 to 29 Years' = '20-29',
+        '30 to 39 Years' = '30-39',
+        '40 to 49 Years' = '40-49',
+        '50 to 59 Years' = '50-59',
+        '60 to 69 Years' = '60-69',
+        '70 to 79 Years' = '70-79',
+        '80 to 89 Years' = '80-89',
+        '90 and older' = '90+'
+      )
   )
 
 #create a graph for source of infection against age group
@@ -137,8 +137,27 @@ neighbour_age <-
   theme(axis.text.x = element_text(angle = 60,hjust = 1))
 neighbour_age
 
-# want a graph with hospitalized people and their infected time!! to determine the burden of medic system
+# want a graph with hospitalized people and their reported time!! to determine the burden of medic system
+hospitalized <- 
+  clean_raw_data[,c(8,14)]
+my_stamp<-stamp( "2019-02", 
+                 orders = "ym") 
+hospitalized$reported_date <-
+  my_stamp(hospitalized$reported_date)
 
+hospitalized <-
+  subset(hospitalized, ever_hospitalized=="Yes")
+
+hospitalized_graph <-
+  hospitalized %>%
+  #drop_na(reported_date) %>%
+  #drop_na(hospitalized) %>%
+  ggplot(mapping = aes(x=reported_date)) +
+  geom_histogram(stat="count", color="darkgoldenrod", fill="darkgoldenrod1") +
+  coord_flip() +
+  theme(axis.text.x = element_text(size = 8)) +
+  labs(x="Reported Date", y="Number of Hospitalized People")
+hospitalized_graph  
 
 
 
