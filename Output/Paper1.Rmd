@@ -39,16 +39,16 @@ resources <- list_package_resources("64b54586-6180-4485-83eb-81e8fae3b8fe")
 datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
 
 # load the first datastore resource as a sample
-#data <- filter(datastore_resources, row_number()==1) %>% get_resource()
-#data
+data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+data
 
 ```
 
 ```{r echo=FALSE, warning = FALSE, error = FALSE}
-# write_csv(
-#   x=data,
-#   file="../toronto_covid_cases.csv"
-# )
+write_csv(
+  x=data,
+  file="../toronto_covid_cases.csv"
+)
 
 #read csv and store it in raw_data variable
 raw_data <-
@@ -60,7 +60,7 @@ raw_data <-
 
 # Introduction
 
-Over the past two years, the COVID-19 pandemic affected many people around the world and people in Toronto are under lockdown most of the time. There are multiple lockdown from March 2020 to February 2022 [@timeline], with the first from March 2020 to June 2020, second one from December 2020 to March 2021 and the last/most recent one being from December 2021 to February 2022. Compared to other major cities, Toronto has the largest number of days of banning indoor dining, as of May 2021[@lockdown]. With other major cities such as New York, Paris and London have around 250 days of indoor dining restrictions, Toronto has over 360 days in total which means that restaurants in Toronto were closed most of the time during 2020. All these restrictions were implemented by the Canada government and the goal of this research is to find out the key indicators affecting the current policy making process and future plans. Why the government picked the above 3 duration for lockdwon? Is it directly related to the number of COVID-19 cases in those months or are there any other factors affecting them such as fatal rate, source of infection and burden from public health unit and hospitals? In order to find out the correlations, we must analyze the Toronto COVID-19 data set provided by Toronto Public Health [@portal]. It is very important for us to look into the graphs and numbers reflected from the data set since studying the relationships between variables is the easiest and simplest way to reflect the actual situation of Toronto throughout the pandemic and for us to provide evidence to support/against the government's policies/plans. People in Toronto have been protesting and waiting for the business to reopen [@yyz], 
+Over the past two years, the COVID-19 pandemic affected many people around the world and people in Toronto are under lockdown most of the time. There are multiple lockdown from March 2020 to February 2022 [@timeline], with the first from March 2020 to June 2020, second one from December 2020 to March 2021 and the last/most recent one being from December 2021 to February 2022. Compared to other major cities, Toronto has the largest number of days of banning indoor dining, as of May 2021[@lockdown]. With other major cities such as New York, Paris and London have around 250 days of indoor dining restrictions, Toronto has over 360 days in total which means that restaurants in Toronto were closed most of the time during 2020. All these restrictions were implemented by the Canada government and the goal of this research is to find out the key indicators affecting the current policy making process and future plans. Why the government picked the above 3 duration for lockdwon? Is it directly related to the number of COVID-19 cases in those months or are there any other factors affecting them such as fatal rate, source of infection and burden from public health unit and hospitals? In order to find out the correlations, we must analyze the Toronto COVID-19 data set provided by Toronto Public Health [@portal]. It is very important for us to look into the graphs and numbers reflected from the data set since studying the relationships between variables is the easiest and simplest way to reflect the actual situation of Toronto throughout the pandemic and for us to provide evidence to support/against the government's policies/plans. People in Toronto have been protesting and waiting for the business to reopen, citizens are already really frustrated due to the lockdown and experiencing lockdown fatigue, they are ready to move forward and put this pandemic behind them [@yyz]. Therefore it is important for us to understand the reasons behind all these COVID related policies and this is why this data set is worth studying.
 
 # Data
 
@@ -113,8 +113,6 @@ clean_raw_data <-
       )
   )
 
-#arrange the grid with gridExtra package
-#grid.arrange(graph1, graph2, nrow=2)
 ```
 
 
@@ -122,8 +120,6 @@ clean_raw_data <-
 clean_raw_data %>%
   drop_na(age_group) %>%
   ggplot(mapping = aes(x=source_of_infection, fill=age_group)) +
-  #ggplot(mapping = aes(x=source_of_infection, y = Freq,fill=age_group)) +
-  #geom_col() +
   geom_bar(width=0.7) +
   theme(axis.text.x = element_text(size = 10)) +
   scale_fill_brewer(palette="Paired") +
@@ -190,9 +186,10 @@ fatal_rate[,c(-2)] %>%
 
 From Table \@ref(tab:tab1), we can see that number of deaths in Toronto for people aged 19 or below is 3 while the number of deaths for people aged 90+ is 1065. The huge difference in the number is a strong evidence showing that younger people generally have a better immune system to defend COVID-19. If we take a closer look at the column for fatal rate we will be surprised by how the fatal rate of age group 90+ is 23.5% while age group 19 or below only has a fatal rate of 0.007%. Comparing with other age groups, people who are below 60 years old have a fatal rate of less than 1% while people who are 60-69 has fatal rate of 2.5%, 7.2% for 70-79 age group and 16.5% for 80-89 age group. We can say that there is an exponential growth on the fatal rate, therefore elderly will be at a really high risk if they are tested positive for COVID-19. From Figure \@ref(fig:sources) and we have mentioned earlier, household contact is one of the major infections sources. If one of the family members has been infected, he/she may easily pass on the virus to the elderly at home causing severe illness with a 23.5% death rate. Therefore the distancing/lockdown measures are not set up to prevent the elderly to go out, in fact they are implemented to avoid their family members spreading the virus to them after being infected in the community. Apart from the distancing/lockdown policies, there are also a few hotline for COVID-19 support specifically for elderly [@elderly].
 
+
 ## Public Health Unit and Hospitals Burden
 
-In our last session, we will examine the correlations between the total number of COVID-19 cases and hospitalized cases. The burden of the public health unit and hospitals have been greatly increased since pandemic, 
+In our last session, we will examine the correlations between the total number of COVID-19 cases and hospitalized cases. The burden of the public health unit and hospitals have been greatly increased since pandemic, therefore we would like to study the statistics of the hospitalized people and cross check it with the dates of lockdown so that we can determine if there is a direct relationship between them. Does the number of hospitalized cases lead to the lockdown policy in order to relieve the public health unit burden? Does the timeline of the COVID-19 policy [@timeline] match the general trend of the graphs in Figure \@ref(fig:ep)? 
 
 
 ```{r echo=FALSE, warning=FALSE, include=FALSE}
@@ -207,8 +204,6 @@ hospitalized <-
   subset(hospitalized, ever_hospitalized=="Yes")
 
 g1 <- hospitalized %>%
-  #drop_na(reported_date) %>%
-  #drop_na(hospitalized) %>%
   ggplot(mapping = aes(x=reported_date)) +
   geom_histogram(stat="count", color="darkgoldenrod", fill="darkgoldenrod1") +
   coord_flip() +
@@ -224,18 +219,20 @@ timeline$episode_date <-
   my_stamp(timeline$episode_date)
 ```
 
-```{r ep, fig.cap = "Number of COVID-19 Cases Per Month", echo=FALSE, warning=FALSE, fig.height=5}
+```{r ep, fig.cap = "Number of COVID-19 Cases Per Month", echo=FALSE, warning=FALSE, fig.height=4}
 g2 <- timeline %>%
   ggplot(mapping = aes(x=episode_date)) +
   geom_histogram(stat="count", color="black", fill="red") + 
   coord_flip() +
   theme_minimal() +
-  labs(x="Number of People Infected by COVID-19", y="Episode Date")
+  labs(y="Number of People Infected by COVID-19", x="Episode Date")
   
 grid.arrange(g1,g2, nrow=1)
 ```
 
-# Discussion
+From Figure \@ref(fig:ep), on the right side, the graph with red bars is reflect the total number of infected people in the past 2 years, we cannot notice any cases in 2020 January and February because there are only a few cases in these two months thus the number is too small and cannot be shown on the graph. There is a significant increase in March 2020 and a drop in May 2020, starting September 2020 there is a increasing trend with a drop in February and March 2021 and a peak in April 2021 of around 35,000 cases. The number of cases remain below 5,000 from June to November 2021, however in December 2021 there is a sudden raise and the cases in that month exceed 50,000. The graph on the left in Figure \@ref(fig:ep) is the number of hospitalized people per month. We can notice that the graph has a very similar pattern with the graph on the right, the peak basically overlapped with each other and it precisely reflected the period of lockdown. The major peaks are April 2020, January 2021, April 2021 and December 2021, all of these dates the government had implemented enhanced distancing policies with April 2021 Toronto was declared as state of emergency in order to control the spread of COVID-19 and relieve the burden of public health unit and health care related occupations.
+
+
 
 
 \newpage
