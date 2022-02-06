@@ -23,6 +23,10 @@ datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'
 data <- filter(datastore_resources, row_number()==1) %>% get_resource()
 #data
 
+# make sure we are working on the correct directory
+getwd()
+setwd("/Users/basilwong/Documents/UofT/Year5/STA304/Toronto_covid_cases/Scripts")
+
 #write csv to a csv file
 write_csv(
   x=data,
@@ -130,12 +134,12 @@ fatal_rate[,c(-2)] %>%
   )
 
 
-neighbour_age <- 
-  clean_raw_data[,c(2,14)] %>%
-  ggplot(mapping = aes(x=age_group, fill=ever_hospitalized)) +
-  geom_bar(position="dodge") +
-  theme(axis.text.x = element_text(angle = 60,hjust = 1))
-neighbour_age
+# neighbour_age <- 
+#   clean_raw_data[,c(2,14)] %>%
+#   ggplot(mapping = aes(x=age_group, fill=ever_hospitalized)) +
+#   geom_bar(position="dodge") +
+#   theme(axis.text.x = element_text(angle = 60,hjust = 1))
+# neighbour_age
 
 # want a graph with hospitalized people and their reported time!! to determine the burden of medic system
 hospitalized <- 
@@ -158,6 +162,19 @@ hospitalized_graph <-
   theme(axis.text.x = element_text(size = 8)) +
   labs(x="Reported Date", y="Number of Hospitalized People")
 hospitalized_graph  
+
+timeline <- 
+  clean_raw_data[,c(7,8)]
+my_stamp<-stamp( "2019-02", 
+                 orders = "ym") 
+timeline$episode_date <-
+  my_stamp(timeline$episode_date)
+timeline_graph <-
+  timeline %>%
+  ggplot(mapping = aes(x=episode_date)) +
+  geom_histogram(stat="count") + 
+  coord_flip()
+timeline_graph
 
 
 

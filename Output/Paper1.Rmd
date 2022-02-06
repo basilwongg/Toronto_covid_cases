@@ -1,0 +1,246 @@
+---
+title: "How did the Number of COVID-19 cases Affect the Distancing Policy of the Canada Government?"
+author: "Wong Basil Chi Fung"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  bookdown::pdf_document2
+thanks: 'Code and data are available at: https://github.com/basilwongg/Toronto_covid_cases
+  & https://open.toronto.ca.'
+abstract: Two years has passed since we first discovered coronavirus in Toronto. Premier of Ontario, Doug Ford, has declared Toronto as state of emergency serval times and people in Toronto have experienced multiple lockdowns. There have been quite a number of protests during this pademic criticing the decisions of the governemnt. Therefore in this resarch we will obtain a open data from Toronto Open Data Protal
+toc: FALSE
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE, warning = FALSE, error = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# getwd()
+# setwd("/Users/basilwong/Documents/UofT/Year5/STA304/Toronto_covid_cases/Output")
+
+library(opendatatoronto)
+library(dplyr)
+library(tidyverse)
+library(janitor) 
+library(tidyr) 
+library(ggplot2)
+library(lubridate)
+library(gridExtra)
+library(scales)
+library(bookdown)
+library(knitr)
+
+# get package
+package <- show_package("64b54586-6180-4485-83eb-81e8fae3b8fe")
+package
+
+# get all resources for this package
+resources <- list_package_resources("64b54586-6180-4485-83eb-81e8fae3b8fe")
+
+# identify datastore resources; by default, Toronto Open Data sets datastore resource format to CSV for non-geospatial and GeoJSON for geospatial resources
+datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
+# load the first datastore resource as a sample
+#data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+#data
+
+```
+
+```{r echo=FALSE, warning = FALSE, error = FALSE}
+# write_csv(
+#   x=data,
+#   file="../toronto_covid_cases.csv"
+# )
+
+#read csv and store it in raw_data variable
+raw_data <-
+  read.csv(
+    "../toronto_covid_cases.csv")
+
+
+```
+
+# Introduction
+
+# Data
+
+## Data Summary
+
+The data for this research is obtained from the portal of Open Data Toronto [@opendata]. The open data portal is an open sources that is entirely free for the general public. It contains a huge variety of data with different categories such as City Government, Locations and Mapping, Community Services, Transportation etc. Out of all the data sets related to COVID-19, I chose the data set documenting all the COVID-19 cases in Toronto, the data is updated on a weekly basis and was first created on January 2020 when the first case was reported [@portal]. The data set has 18 variables including ID, assigned ID, outbreak associated, age group, neighborhood name, forward station area, source of infection, classification, episode date, reported date, client gender, outcome, currently hospitalized, currently in ICU, currently intubated, ever hospitalized, ever in ICU and ever intubated [@portal]. We will be focusing on a few of the variables instead of studying all of them, some of the data is relatively hard to study such as neighborhood names since there are 140 different geographically distinct neighborhoods in Toronto [@opendata] and if we were to plot a graph, it would be almost impossible to present all the columns and thus making it extremely hard to analyze. Therefore we will not be analyzing these types of data, instead we will study those are more trival and well defined.
+
+## R Packages
+
+As we want to focus on the relationship between the number of COVID-19 cases and the government distancing policy, we will investigate our data set based on the age group, source of infection, date of infection, outcome and ever hospitalized columns. We will be using R [@citeR] throughout the whole research with the aid of different packages provided by R. The package **opendatatoronto** [@opendata] is used to extract data from the open data Toronto portal which is the main package we will be using for our research, the raw data set is retrieved by obtaining the specific package from the open data portal. **dplyr** [@dplyr] is used for data manipulation focusing on data frames, **tidyverse** [@tidyverse] is used for data exploration and visualization, **janitor** [@janitor], **tidyr** [@tidyr] and **lubridate** [@lubridate] are used for cleaning the data set so the developer can analyze the data in a more organized way while **ggplot2** [@ggplot], **gridExtra** [@gridExtra] and **scales** [@scales] are the most important packages because they are used to generate graphs and table in order for us to present our findings. We will be using bar charts, histograms and tables to deliver our findings, based on our data characteristic, different types of graphs/tables will come in handy. 
+
+## Source of Infection 
+
+In order to investigate the relationship, first we need to understand how COVID-19 is spread. According to the US. Department of Health & Human Services [@q&a], COVID-19 is spread along the below three main paths: 
+
+1. Staying in the same area and breathing in air with an infected person who's exhaling droplets and particles that contain virus 
+2. Have close contact with the droplets and particles that contain virus with our nose, mouth and eyes 
+3. Contacting our nose, mouth and eyes with our body part containing virus on them 
+
+Therefore it is pretty obvious that the interaction between people is the main channel for the virus to spread, however out of all the social activities, which of them is the most common channel for the virus to spread and turn into a pandemic. The infection sources are divided into 9 fields namely travel, 3 types of outbreak under different circumstances, household contact, close contact and community with the remaining cases as no information and pending [@opendata]. 
+
+```{r echo=FALSE, warning=FALSE}
+#change the char to date
+raw_data <- 
+  mutate(raw_data, Episode.Date = as.Date(Episode.Date, format="%Y-%m-%d"))
+raw_data <-
+  mutate(raw_data, Reported.Date = as.Date(Reported.Date, format="%Y-%m-%d"))
+
+#data cleaning
+clean_raw_data <- subset(raw_data, select = -c(X_id, Assigned_ID))
+#clean name
+clean_raw_data <- clean_names(clean_raw_data)
+
+#recode the name of the age group
+clean_raw_data <- 
+  clean_raw_data %>%
+  mutate(
+    age_group = 
+      recode(
+        age_group,
+        '19 and younger' = '19 or below',
+        '20 to 29 Years' = '20-29',
+        '30 to 39 Years' = '30-39',
+        '40 to 49 Years' = '40-49',
+        '50 to 59 Years' = '50-59',
+        '60 to 69 Years' = '60-69',
+        '70 to 79 Years' = '70-79',
+        '80 to 89 Years' = '80-89',
+        '90 and older' = '90+'
+      )
+  )
+
+#arrange the grid with gridExtra package
+#grid.arrange(graph1, graph2, nrow=2)
+```
+
+
+```{r sources, fig.cap="Source of Infections with Age Distribution", echo=FALSE, warning=FALSE, fig.height=4}
+clean_raw_data %>%
+  drop_na(age_group) %>%
+  ggplot(mapping = aes(x=source_of_infection, fill=age_group)) +
+  #ggplot(mapping = aes(x=source_of_infection, y = Freq,fill=age_group)) +
+  #geom_col() +
+  geom_bar(width=0.7) +
+  theme(axis.text.x = element_text(size = 10)) +
+  scale_fill_brewer(palette="Paired") +
+  coord_flip() +
+  labs(x="Source of Infection")
+
+```
+
+From (Figure \@ref(fig:sources)) we can see that there are around 120000 cases classified as no information. The number of no information cases are way more than other sources, this may cause a bias in the government policy making process as they are unable to determine the source of the COVID-19 virus. The cause of the no information category might due to the huge medical burden in Toronto Public Health Unit, therefore the government can only decide their policies depending on the information they have. 
+
+Neglecting the no information bar, the second largest group is community infection with around 63000 cases followed by household contact of around 34000 cases. The rest of the categories are all below 20000 with travel being the shortest column. The result fits the policy made by the Canada government on the March 20 stating that the Canada USA border was closed to all non-essential travelers [@timeline], ever since the border is shutdown in March, the number of traveling infection has turned from the largest category to the smallest category [@portal] therefore it reflected the border shutdown policy is indeed effective. With household contact being the third largest group of infection source, this result did not surprise me because since 2020, Toronto has gone through lockdown three times and hence if someone is infected before lockdown, his/her family will then has a really high chance of getting infected as well. then we proceed with community infection, our second largest source of infection. This is the largest known group of infection in the data set and is the main factor affecting the government's policy. Below we will investigate more on community infection and see how it truly affect the social distancing and lockdown policy in the past 2 years.
+```{r commun, echo=FALSE}
+community_data <- subset(clean_raw_data, source_of_infection == "Community") 
+```
+
+
+```{r graph2, fig.cap="Age Distribution", echo=FALSE, warning=FALSE, fig.height=4}
+#get the graph that only contains data from community infection
+community_data %>%
+  drop_na(age_group) %>%
+  ggplot(mapping = aes(x=age_group)) +
+  geom_histogram(stat= 'count', color="darkblue", fill="lightblue") +
+  theme(axis.text.x = element_text(size = 10)) +
+  labs(x="Age Group", y="Number of \nCommunity Infection")
+
+```
+
+According to (Figure \@ref(fig:graph2)), a obvious pattern can be easily spotted, apart from the less than or equal to 19 age group, from 20-29 years old onward, the number of community infection is inversely proportional to the increase in age group. With school being one of the largest locations for social students to gather, 8In 2020 March, Ontario Premier Doug Ford announces that all school should be closed and students should not be returning to school for in person learning [@timeline]. March 17,2020 Ford declared a state of emergency, ordered some business to be closed including but not only daycares, bars and restaurants, theatres and private school [@timeline]. Most of these are places where teenagers usually go and will have social gathering, therefore to avoid these gatherings, the government decided to shutdown those locations. 
+
+The group of age with 90+ seems to have the smallest amount of COVID-19 cases, however there might be a bias in the data set affecting the policy making process because number of year who are 90 years old or above are way less than the other age group, so the number of community cases for are hence relatively lower. In March 22, 2020 there was an outbreak in a nursing home in Bobcaygeon [@nursing], 14 staffs and 3 residents are confirmed to be positive with 50+ more people living there with COVID-19 symptoms. This showed that the outbreak among elderly is also severe in the early stage of COVID-19 outbreak, however throughout the past 2 years, there are not much COVID-19 related policies for the elderly and that might due to the bias showed in the figure. Next we will be looking at the fatal rate of COVID-19.
+
+```{r, echo=FALSE, warning=FALSE, include=FALSE}
+fatal_rate <-
+  clean_raw_data [,c(2,10)] %>%
+  drop_na(age_group) %>%
+  group_by(age_group, outcome) %>%
+  summarise(n = n()) %>%
+  group_by(age_group) %>%
+  mutate(total = sum(n), Ratio = round(n/total, 5)) %>%
+  subset(outcome == "FATAL")
+
+#must re run the above code otherwise the percent function will not work 
+#because we cannot convert % to % again
+fatal_rate <-
+  mutate(fatal_rate, Ratio = percent(Ratio, accuracy = 0.001)) 
+```
+
+
+## Fatal Rate
+
+The reason why COVID-19 was causing such a panic around the world is that COVID-19 virus can cause severely respiratory illness, post COVID conditions and even death. Before the first COVID-19 vaccine was invented in December 11,2020 by Pifzer, the first company to receive approval from Food and Drug Administration [@vaccine], there is no other way for people around the world to fight against this virus, the only thing we can do is to maintain social distancing and keep our personal hygiene such as washing our hands, wearing a mask and avoid poorly ventilated spaces and crowds [@q&a]. The outcome of COVID-19 are divided into 3 different types: fatal, resolved and active. We are not interested in those cases with outcome "fatal" and will  look into the data of the fatal rate due to COVID-19 in Toronto to see how this data affected or biased the government policy making.
+
+```{r tab1, echo=FALSE, warning=FALSE}
+fatal_rate[,c(-2)] %>%
+  kable(
+    caption = "Toronto Covid-19 Fatal Rate (by Age Group)",
+    col.names = c("Age Range", "Num of Death(s)", "Num of cases", "Fatal Rate"),
+    booktabs = TRUE, 
+    linesep = "",
+    align = c('l', 'r', 'r', 'r'),
+    format.args = list(big.mark = ",")
+  )
+```
+
+From Table \@ref(tab:tab1), we can see that number of deaths in Toronto for people aged 19 or below is 3 while the number of deaths for people aged 90+ is 1065. The huge difference in the number is a strong evidence showing that younger people generally have a better immune system to defend COVID-19. If we taking a closer look at the column for fatal rate we will be surprised by how the fatal of 90+ is 23.5% while 19 or below only has a fatal rate of 0.007%. Comparing with other age groups, people who are below 60 years old have a fatal rate of less than 1% while people who are 60-69 has fatal rate of 2.5%, 7.2% for 70-79 age group and 16.5% for 80-89 age group. We can say that there is an exponential growth  
+
+
+
+
+
+
+```{r echo=FALSE, warning=FALSE, include=FALSE}
+hospitalized <- 
+  clean_raw_data[,c(8,14)]
+my_stamp<-stamp( "2019-02", 
+                 orders = "ym") 
+hospitalized$reported_date <-
+  my_stamp(hospitalized$reported_date)
+
+hospitalized <-
+  subset(hospitalized, ever_hospitalized=="Yes")
+
+g1 <- hospitalized %>%
+  #drop_na(reported_date) %>%
+  #drop_na(hospitalized) %>%
+  ggplot(mapping = aes(x=reported_date)) +
+  geom_histogram(stat="count", color="darkgoldenrod", fill="darkgoldenrod1") +
+  coord_flip() +
+  theme(axis.text.x = element_text(size = 8)) +
+  labs(x="Reported Date", y="Number of Hospitalized People")
+
+timeline <- 
+  clean_raw_data[,c(7,8)]
+my_stamp<-stamp( "2019-02", 
+                 orders = "ym") 
+timeline$episode_date <-
+  my_stamp(timeline$episode_date)
+```
+
+
+
+```{r ep, fig.cap = "Number of COVID-19 Cases Per Month", echo=FALSE, warning=FALSE}
+g2 <- timeline %>%
+  ggplot(mapping = aes(x=episode_date)) +
+  geom_histogram(stat="count") + 
+  coord_flip()
+grid.arrange(g1,g2, nrow=1)
+```
+
+
+
+
+
+
+# Discussion
+
+\newpage
+# References
+
+<div id="refs"></div>
+
+
