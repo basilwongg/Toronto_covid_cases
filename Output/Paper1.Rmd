@@ -6,7 +6,7 @@ output:
   bookdown::pdf_document2
 thanks: 'Code and data are available at: https://github.com/basilwongg/Toronto_covid_cases
   & https://open.toronto.ca.'
-abstract: Two years has passed since we first discovered coronavirus in Toronto. Premier of Ontario, Doug Ford, has declared Toronto as state of emergency serval times and people in Toronto have experienced multiple lockdowns. There have been quite a number of protests during this pademic criticing the decisions of the governemnt. Therefore in this resarch we will obtain a open data from Toronto Open Data Protal
+abstract: Two years has passed since we first discovered coronavirus in Toronto. Premier of Ontario, Doug Ford, has declared Toronto as state of emergency serval times and people in Toronto have experienced multiple lockdowns. There have been quite a number of protests during this pademic criticing the decisions of the governemnt. Therefore in this resarch we will obtain a open data from Toronto Open Data Protal to study whether to number of COVID-19 cases throughout the past 2 years is the main indicator for the government to implement the distancing/lockdown policy.
 toc: FALSE
 bibliography: references.bib
 ---
@@ -78,7 +78,7 @@ In order to investigate the relationship, first we need to understand how COVID-
 2. Have close contact with the droplets and particles that contain virus with our nose, mouth and eyes 
 3. Contacting our nose, mouth and eyes with our body part containing virus on them 
 
-Therefore it is pretty obvious that the interaction between people is the main channel for the virus to spread, however out of all the social activities, which of them is the most common channel for the virus to spread and turn into a pandemic. The infection sources are divided into 9 fields namely travel, 3 types of outbreak under different circumstances, household contact, close contact and community with the remaining cases as no information and pending [@opendata]. 
+Therefore it is pretty obvious that the interaction between people is the main channel for the virus to spread, however out of all the social activities, which of them is the most common channel for the virus to spread and turn into a pandemic. The infection sources are divided into 9 fields namely travel, 3 types of outbreak under different circumstances, household contact, close contact and community with the remaining cases as no information and pending [@opendata]. The the outbreak of the virus, it is mainly divided into three subtypes: congregate setting, healthcare institutions and others. Household contact and close contact are cases where the person acquired COVID-19 through family members, roommates, close friends or even co-worker, however infection acquired from school is classified as "other setting - outbreak" [@opendata]. 
 
 ```{r echo=FALSE, warning=FALSE}
 #change the char to date
@@ -172,7 +172,7 @@ fatal_rate <-
 
 ## Fatal Rate
 
-The reason why COVID-19 was causing such a panic around the world is that COVID-19 virus can cause severely respiratory illness, post COVID conditions and even death. Before the first COVID-19 vaccine was invented in December 11,2020 by Pifzer, the first company to receive approval from Food and Drug Administration [@vaccine], there is no other way for people around the world to fight against this virus, the only thing we can do is to maintain social distancing and keep our personal hygiene such as washing our hands, wearing a mask and avoid poorly ventilated spaces and crowds [@q&a]. The outcome of COVID-19 are divided into 3 different types: fatal, resolved and active. We are not interested in those cases with outcome "fatal" and will  look into the data of the fatal rate due to COVID-19 in Toronto to see how this data affected or biased the government policy making.
+The reason why COVID-19 was causing such a panic around the world is that COVID-19 virus can cause severely respiratory illness, post COVID conditions and even death. Before the first COVID-19 vaccine was invented in December 11,2020 by Pifzer, the first company to receive approval from Food and Drug Administration [@vaccine], there is no other way for people around the world to fight against this virus, the only thing we can do is to maintain social distancing and keep our personal hygiene such as washing our hands, wearing a mask and avoid poorly ventilated spaces and crowds [@q&a]. The outcome of COVID-19 are divided into 3 different types: fatal, resolved and active. We are only interested in those cases with outcome "fatal" in  this part and will  look into the data of the fatal rate due to COVID-19 in Toronto to see how this data affected or biased the government policy making.
 
 ```{r tab1, echo=FALSE, warning=FALSE}
 fatal_rate[,c(-2)] %>%
